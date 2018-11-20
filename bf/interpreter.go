@@ -3,6 +3,8 @@ package bf
 import (
 	"errors"
 	"io"
+	"bufio"
+	"os"
 )
 
 type instruction struct {
@@ -98,4 +100,48 @@ func (s *state) interpretInstruction() {
 		}
 	}
 	s.instructionPtr += 1
+}
+
+type flushingWriter struct {
+	w *bufio.Writer
+}
+
+func (w flushingWriter) Write(p []byte) (int, error) {
+	count, err := w.w.Write(p)
+	if err != nil {
+		return 0, err
+	}
+
+	w.w.Flush()
+
+	return count, nil
+}
+
+func newInterpreter(src string) state {
+	instructions := parseInput(tokenizeInput(src))
+	var writer io.Writer
+
+	writer = flushingWriter{
+		w: bufio.NewWriter(os.Stdout),
+	}
+
+	state := state{
+		instructionPtr: 0,
+		src: instructions,
+		buffer: make([]byte, 1),
+		writer: writer,
+	}
+
+	return state
+}
+
+
+func run(intp state) {
+	for {
+		if int(intp.instructionPtr) == len(intp.src) {
+			return
+		}
+
+		intp.interpretInstruction()
+	}
 }

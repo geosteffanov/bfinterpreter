@@ -7,20 +7,6 @@ import (
 	"testing"
 )
 
-type flushingWriter struct {
-	w *bufio.Writer
-}
-
-func (w flushingWriter) Write(p []byte) (int, error) {
-	count, err := w.w.Write(p)
-	if err != nil {
-		return 0, err
-	}
-
-	w.w.Flush()
-
-	return count, nil
-}
 
 func TestInterpretInstruction(t *testing.T) {
 	var writer io.Writer
@@ -65,24 +51,12 @@ func TestInterpretInstruction(t *testing.T) {
 }
 
 func TestInterpreter(t *testing.T) {
-	input :=  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[.]"
-	instructions := parseInput(tokenizeInput(input))
-	var writer io.Writer
+	input :=  "[->+<]>."
+	interpreter := newInterpreter(input)
+	interpreter.mem.memory[0].value  = byte(65)
+	interpreter.mem.memory[1].value  = byte(1)
 
-	writer = flushingWriter{
-		w: bufio.NewWriter(os.Stdout),
-	}
 
-	state := state{
-		instructionPtr: 0,
-		src: instructions,
-		buffer: make([]byte, 1),
-		writer: writer,
-	}
-
-	for i := 0; i < 82; i++ {
-		state.interpretInstruction()
-	}
-
+	run(interpreter)
 
 }
