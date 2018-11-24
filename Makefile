@@ -11,5 +11,5 @@ tmp:
 
 clean:
 	rm -rf .tmp
-	rm bfinterpreter
+	rm -rf bfinterpreter
 
