@@ -1,12 +1,12 @@
 package bf
 
 import (
-	"errors"
-	"io"
 	"bufio"
+	"errors"
+	"fmt"
+	"io"
 	"os"
 	"strconv"
-	"fmt"
 )
 
 type instruction struct {
@@ -72,10 +72,6 @@ func (s *state) writeCellValue() error {
 		return errors.New("couldn't write to output")
 	}
 
-	bufioWriter := s.writer.(flushingWriter)
-	bufioWriter.w.Flush()
-	bufioWriter.w.Reset(os.Stdout)
-
 	return nil
 }
 
@@ -110,14 +106,22 @@ func (s *state) interpretInstruction() {
 func (s *state) addInstructions(src string) {
 	instructions := parseInput(tokenizeInput(src))
 
-	s.src  = append(s.src, instructions...)
+	s.src = append(s.src, instructions...)
 }
 
 type flushingWriter struct {
 	w *bufio.Writer
 }
 
-func (w flushingWriter) Write(p []byte) (int, error) {
+func newFlushingWriter() io.Writer {
+	writer := &flushingWriter{
+		w: bufio.NewWriter(os.Stdout),
+	}
+
+	return writer
+}
+
+func (w *flushingWriter) Write(p []byte) (int, error) {
 	fmt.Print("#=> ")
 	count, err := w.w.Write(p)
 	if err != nil {
@@ -134,14 +138,22 @@ type lineReader struct {
 	r *bufio.Reader
 }
 
-func (r lineReader) Read(buffer []byte) (int, error) {
+func newLineReader() io.Reader {
+	reader := &lineReader{
+		r: bufio.NewReader(os.Stdin),
+	}
+
+	return reader
+}
+
+func (r *lineReader) Read(buffer []byte) (int, error) {
 	stringVal, err := r.r.ReadString('\n')
 
 	if err != nil {
 		return 0, err
 	}
 
-	result, err := strconv.ParseInt(stringVal[:len(stringVal) - 1], 10, 8)
+	result, err := strconv.ParseInt(stringVal[:len(stringVal)-1], 10, 8)
 
 	if err != nil {
 		return 0, err
@@ -154,34 +166,24 @@ func (r lineReader) Read(buffer []byte) (int, error) {
 
 func NewInterpreter(src string) state {
 	instructions := parseInput(tokenizeInput(src))
-	var writer io.Writer
-
-	reader := &lineReader{
-		r: bufio.NewReader(os.Stdin),
-	}
-
-	writer = flushingWriter{
-		w: bufio.NewWriter(os.Stdout),
-	}
 
 	state := state{
 		instructionPtr: 0,
-		src: instructions,
-		buffer: make([]byte, 1),
-		writer: writer,
-		reader: reader,
+		src:            instructions,
+		buffer:         make([]byte, 1),
+		writer:         newFlushingWriter(),
+		reader:         newLineReader(),
 	}
 
 	return state
 }
 
-func Run(intp *state) bool {
+func (s *state) Run() {
 	for {
-		if int(intp.instructionPtr) == len(intp.src) {
-
-			return false
+		if int(s.instructionPtr) == len(s.src) {
+			return
 		}
 
-		intp.interpretInstruction()
+		s.interpretInstruction()
 	}
 }

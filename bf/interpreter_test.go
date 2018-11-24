@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 func TestInterpretInstruction(t *testing.T) {
 	var writer io.Writer
 
@@ -51,9 +50,8 @@ func TestInterpretInstruction(t *testing.T) {
 }
 
 func TestInterpreter(t *testing.T) {
-	input :=  ","
+	input := ","
 	interpreter := NewInterpreter(input)
-
 
 	Run(interpreter)
 

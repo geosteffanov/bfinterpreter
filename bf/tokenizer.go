@@ -46,7 +46,7 @@ type tokenizingStream struct {
 	reader io.Reader
 }
 
-func (s tokenizingStream) Read(p []byte) (int, error) {
+func (s *tokenizingStream) Read(p []byte) (int, error) {
 	buffer := make([]byte, len(p))
 
 	count, err := s.reader.Read(buffer)
@@ -112,7 +112,6 @@ func parseInput(instructions []instruction) []instruction {
 		prevInst := stack[len(stack)-1]
 		prevInst.matchingBracketIdx = uint(idx)
 		instructions[prevInst.idx] = prevInst
-
 
 		inst.idx = uint(idx)
 		inst.matchingBracketIdx = prevInst.idx
