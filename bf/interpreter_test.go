@@ -51,12 +51,10 @@ func TestInterpretInstruction(t *testing.T) {
 }
 
 func TestInterpreter(t *testing.T) {
-	input :=  "[->+<]>."
-	interpreter := newInterpreter(input)
-	interpreter.mem.memory[0].value  = byte(65)
-	interpreter.mem.memory[1].value  = byte(1)
+	input :=  ","
+	interpreter := NewInterpreter(input)
 
 
-	run(interpreter)
+	Run(interpreter)
 
 }
