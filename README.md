@@ -11,3 +11,9 @@ make
 ./bfinterpreter
 ```
 #### 4. Enjoy!
+
+
+
+#### Make sure to read the language specification of Brainfuck.
+
+#### You can find it [here](https://en.wikipedia.org/wiki/Brainfuck#Commands).
